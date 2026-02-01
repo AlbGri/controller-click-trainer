@@ -14,6 +14,7 @@ from .controller_monitor import ControllerMonitor, PressEvent
 from .data_manager import DataManager
 from .diagnostics import ControllerDiagnostics
 from .visualizer import RealtimeChart, HistoryVisualizer
+from .translations import get_text, get_flag_emoji, get_next_language
 
 logger = logging.getLogger(__name__)
 
@@ -21,19 +22,22 @@ logger = logging.getLogger(__name__)
 class App:
     """Finestra principale dell'applicazione."""
 
-    WINDOW_TITLE = "Controller Click Trainer - Durata Pressioni"
     WINDOW_MIN_SIZE = (960, 750)
 
     def __init__(self):
         """Inizializza l'applicazione e tutti i componenti."""
         self.root = tk.Tk()
-        self.root.title(self.WINDOW_TITLE)
         self.root.minsize(*self.WINDOW_MIN_SIZE)
         self.root.protocol("WM_DELETE_WINDOW", self._on_close)
 
         # Componenti business
         self.data_manager = DataManager()
         self.settings = self.data_manager.load_settings()
+
+        # Lingua (carica da settings)
+        self._current_lang = self.settings.get("lingua", "en")
+        self.root.title(self._t("window_title"))
+
         self.monitor = ControllerMonitor(
             threshold_ms=self.settings.get("soglia_durata_ms_default", 50.0)
         )
@@ -103,6 +107,81 @@ class App:
         style.configure("TLabelframe.Label", background=bg, foreground=fg,
                         font=("Segoe UI", 10, "bold"))
 
+    def _t(self, key: str, **kwargs) -> str:
+        """Helper per ottenere testi tradotti.
+
+        Args:
+            key: Chiave di traduzione
+            **kwargs: Parametri per formattazione
+
+        Returns:
+            Testo tradotto nella lingua corrente
+        """
+        return get_text(key, self._current_lang, **kwargs)
+
+    def _save_language(self) -> None:
+        """Salva la lingua corrente nei settings."""
+        self.settings["lingua"] = self._current_lang
+        self.data_manager.save_settings(self.settings)
+
+    def _switch_language(self) -> None:
+        """Cambia la lingua dell'interfaccia."""
+        # Alterna lingua
+        self._current_lang = get_next_language(self._current_lang)
+
+        # Aggiorna titolo finestra
+        self.root.title(self._t("window_title"))
+
+        # Aggiorna bandiera
+        self._btn_flag.config(text=get_flag_emoji(self._current_lang))
+
+        # Aggiorna frames
+        self._stats_frame.config(text=self._t("stats_frame"))
+        self._config_frame.config(text=self._t("config_frame"))
+        self._chart_frame.config(text=self._t("chart_frame"))
+        self._diag_frame.config(text=self._t("diagnostics_frame"))
+        self._log_frame.config(text=self._t("log_frame"))
+
+        # Aggiorna label stats panel
+        self._lbl_last_label.config(text=self._t("last"))
+        self._lbl_ms.config(text=self._t("ms"))
+        for lbl, key in self._stats_labels_text:
+            lbl.config(text=self._t(key))
+
+        # Aggiorna label config panel
+        self._lbl_profile.config(text=self._t("profile"))
+        self._lbl_threshold.config(text=self._t("threshold_duration"))
+        self._lbl_button.config(text=self._t("button"))
+        self._btn_apply.config(text=self._t("apply"))
+
+        # Aggiorna pulsanti azione
+        self._btn_start.config(text=self._t("start"))
+        self._btn_stop.config(text=self._t("stop"))
+        self._btn_save.config(text=self._t("save_session"))
+        self._btn_history.config(text=self._t("history_charts"))
+        self._btn_export.config(text=self._t("export_data"))
+
+        # Aggiorna combo button
+        current_button = self._combo_button.get()
+        # Mappa "Tutti" <-> "All"
+        if current_button in ["Tutti", "All"]:
+            self._combo_button.set(self._t("all_buttons"))
+            current_button = None
+        self._combo_button["values"] = [self._t("all_buttons")] + self.monitor.get_available_buttons()
+
+        # Aggiorna label diagnostica
+        for lbl, key in self._diag_labels_text:
+            lbl.config(text=self._t(key))
+
+        # Aggiorna label soglia e assi nel grafico
+        self._chart.set_threshold_label(self._t("threshold_label"))
+        self._chart.set_axis_labels(self._t("chart_x_axis"), self._t("chart_y_axis"))
+
+        # Salva preferenza
+        self._save_language()
+
+        logger.info(f"Lingua cambiata a: {self._current_lang}")
+
     def _build_ui(self) -> None:
         """Costruisce l'intera interfaccia grafica."""
         main_frame = ttk.Frame(self.root, padding=10)
@@ -124,47 +203,60 @@ class App:
 
     def _build_stats_panel(self, parent: ttk.Frame) -> None:
         """Pannello statistiche: durata ultima pressione e statistiche sessione."""
-        stats_frame = ttk.LabelFrame(parent, text="Durata Pressioni", padding=10)
-        stats_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        self._stats_frame = ttk.LabelFrame(parent, text=self._t("stats_frame"), padding=10)
+        self._stats_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
 
         # Durata ultima pressione (grande)
-        dur_frame = ttk.Frame(stats_frame)
+        dur_frame = ttk.Frame(self._stats_frame)
         dur_frame.pack(fill="x", pady=(0, 10))
 
-        ttk.Label(dur_frame, text="Ultima:", style="Stats.TLabel").pack(side="left")
+        self._lbl_last_label = ttk.Label(dur_frame, text=self._t("last"), style="Stats.TLabel")
+        self._lbl_last_label.pack(side="left")
         self._lbl_duration = ttk.Label(dur_frame, text="- -", style="Big.TLabel")
         self._lbl_duration.pack(side="left", padx=(10, 0))
-        ttk.Label(dur_frame, text="ms", style="Stats.TLabel").pack(side="left", padx=(5, 0))
+        self._lbl_ms = ttk.Label(dur_frame, text=self._t("ms"), style="Stats.TLabel")
+        self._lbl_ms.pack(side="left", padx=(5, 0))
 
         # Griglia statistiche
-        grid_frame = ttk.Frame(stats_frame)
+        grid_frame = ttk.Frame(self._stats_frame)
         grid_frame.pack(fill="x")
 
+        # Salvo le label per poterle aggiornare quando cambia la lingua
+        self._stats_labels_text = []
         labels = [
-            ("Pressioni totali:", "_lbl_total", "0"),
-            ("Durata minima:", "_lbl_min", "- -"),
-            ("Durata media:", "_lbl_avg", "- -"),
-            ("Durata massima:", "_lbl_max", "- -"),
-            ("Sotto soglia:", "_lbl_successes", "0 / 0"),
-            ("Tempo sessione:", "_lbl_session_time", "00:00"),
+            ("total_presses", "_lbl_total", "0"),
+            ("min_duration", "_lbl_min", "- -"),
+            ("avg_duration", "_lbl_avg", "- -"),
+            ("max_duration", "_lbl_max", "- -"),
+            ("below_threshold", "_lbl_successes", "0 / 0"),
+            ("session_time", "_lbl_session_time", "00:00"),
         ]
-        for i, (text, attr, default) in enumerate(labels):
-            ttk.Label(grid_frame, text=text, style="Stats.TLabel").grid(
-                row=i, column=0, sticky="w", pady=2
-            )
+        for i, (key, attr, default) in enumerate(labels):
+            lbl_text = ttk.Label(grid_frame, text=self._t(key), style="Stats.TLabel")
+            lbl_text.grid(row=i, column=0, sticky="w", pady=2)
+            self._stats_labels_text.append((lbl_text, key))
+
             lbl = ttk.Label(grid_frame, text=default, style="Stats.TLabel")
             lbl.grid(row=i, column=1, sticky="w", padx=(10, 0), pady=2)
             setattr(self, attr, lbl)
 
     def _build_config_panel(self, parent: ttk.Frame) -> None:
         """Pannello configurazione: profilo, soglia, pulsante, azioni."""
-        config_frame = ttk.LabelFrame(parent, text="Configurazione", padding=10)
-        config_frame.pack(side="right", fill="both", padx=(5, 0))
+        self._config_frame = ttk.LabelFrame(parent, text=self._t("config_frame"), padding=10)
+        self._config_frame.pack(side="right", fill="both", padx=(5, 0))
 
-        # Profilo
-        ttk.Label(config_frame, text="Profilo:").pack(anchor="w")
-        profile_frame = ttk.Frame(config_frame)
-        profile_frame.pack(fill="x", pady=(2, 8))
+        # Frame superiore: profilo + bandiera
+        top_config_frame = ttk.Frame(self._config_frame)
+        top_config_frame.pack(fill="x", pady=(0, 8))
+
+        # Profilo (a sinistra)
+        profile_container = ttk.Frame(top_config_frame)
+        profile_container.pack(side="left", fill="x", expand=True)
+
+        self._lbl_profile = ttk.Label(profile_container, text=self._t("profile"))
+        self._lbl_profile.pack(anchor="w")
+        profile_frame = ttk.Frame(profile_container)
+        profile_frame.pack(fill="x", pady=(2, 0))
 
         self._combo_profile = ttk.Combobox(profile_frame, state="readonly", width=15)
         self._combo_profile.pack(side="left")
@@ -173,9 +265,25 @@ class App:
         ttk.Button(profile_frame, text="+", width=3,
                    command=self._on_new_profile).pack(side="left", padx=(5, 0))
 
+        # Selettore lingua (a destra)
+        flag_container = ttk.Frame(top_config_frame)
+        flag_container.pack(side="right", padx=(15, 0))
+
+        # Label lingua cliccabile (EN/IT)
+        self._btn_flag = ttk.Label(
+            flag_container,
+            text=get_flag_emoji(self._current_lang),
+            font=("Segoe UI", 10, "underline"),
+            cursor="hand2",
+            foreground=self._colors["testo"]
+        )
+        self._btn_flag.pack(anchor="n", pady=(2, 0))
+        self._btn_flag.bind("<Button-1>", lambda e: self._switch_language())
+
         # Soglia durata (in ms) - obiettivo: stare SOTTO
-        ttk.Label(config_frame, text="Soglia durata (ms):").pack(anchor="w")
-        threshold_frame = ttk.Frame(config_frame)
+        self._lbl_threshold = ttk.Label(self._config_frame, text=self._t("threshold_duration"))
+        self._lbl_threshold.pack(anchor="w")
+        threshold_frame = ttk.Frame(self._config_frame)
         threshold_frame.pack(fill="x", pady=(2, 8))
 
         self._var_threshold = tk.DoubleVar(
@@ -186,53 +294,58 @@ class App:
             textvariable=self._var_threshold, width=8
         )
         self._spin_threshold.pack(side="left")
-        ttk.Button(threshold_frame, text="Applica",
-                   command=self._on_threshold_change).pack(side="left", padx=(5, 0))
+        self._btn_apply = ttk.Button(threshold_frame, text=self._t("apply"),
+                   command=self._on_threshold_change)
+        self._btn_apply.pack(side="left", padx=(5, 0))
 
         # Pulsante da monitorare
-        ttk.Label(config_frame, text="Pulsante:").pack(anchor="w")
-        self._combo_button = ttk.Combobox(config_frame, state="readonly", width=15)
-        self._combo_button["values"] = ["Tutti"] + self.monitor.get_available_buttons()
-        self._combo_button.set("Tutti")
+        self._lbl_button = ttk.Label(self._config_frame, text=self._t("button"))
+        self._lbl_button.pack(anchor="w")
+        self._combo_button = ttk.Combobox(self._config_frame, state="readonly", width=15)
+        self._combo_button["values"] = [self._t("all_buttons")] + self.monitor.get_available_buttons()
+        self._combo_button.set(self._t("all_buttons"))
         self._combo_button.pack(fill="x", pady=(2, 8))
         self._combo_button.bind("<<ComboboxSelected>>", self._on_button_change)
 
         # Pulsanti azione
-        btn_frame = ttk.Frame(config_frame)
+        btn_frame = ttk.Frame(self._config_frame)
         btn_frame.pack(fill="x", pady=(10, 0))
 
-        self._btn_start = ttk.Button(btn_frame, text="Avvia",
+        self._btn_start = ttk.Button(btn_frame, text=self._t("start"),
                                       command=self._on_start)
         self._btn_start.pack(fill="x", pady=2)
 
-        self._btn_stop = ttk.Button(btn_frame, text="Ferma",
+        self._btn_stop = ttk.Button(btn_frame, text=self._t("stop"),
                                      command=self._on_stop, state="disabled")
         self._btn_stop.pack(fill="x", pady=2)
 
-        self._btn_save = ttk.Button(btn_frame, text="Salva sessione",
+        self._btn_save = ttk.Button(btn_frame, text=self._t("save_session"),
                                      command=self._on_save, state="disabled")
         self._btn_save.pack(fill="x", pady=2)
 
-        self._btn_history = ttk.Button(btn_frame, text="Grafici storici",
+        self._btn_history = ttk.Button(btn_frame, text=self._t("history_charts"),
                                         command=self._on_show_history)
         self._btn_history.pack(fill="x", pady=2)
 
-        self._btn_export = ttk.Button(btn_frame, text="Esporta dati",
+        self._btn_export = ttk.Button(btn_frame, text=self._t("export_data"),
                                        command=self._on_export)
         self._btn_export.pack(fill="x", pady=2)
 
     def _build_chart_panel(self, parent: ttk.Frame) -> None:
         """Pannello con grafico a barre durata pressioni."""
-        chart_frame = ttk.LabelFrame(
-            parent, text="Durata Pressioni Real-Time (barra = 1 pressione)", padding=5
+        self._chart_frame = ttk.LabelFrame(
+            parent, text=self._t("chart_frame"), padding=5
         )
-        chart_frame.pack(fill="both", expand=True)
+        self._chart_frame.pack(fill="both", expand=True)
 
         self._chart = RealtimeChart(
-            chart_frame,
+            self._chart_frame,
             max_bars=40,
             threshold_ms=self.settings.get("soglia_durata_ms_default", 50.0),
             colors=self._colors,
+            threshold_label=self._t("threshold_label"),
+            x_axis_label=self._t("chart_x_axis"),
+            y_axis_label=self._t("chart_y_axis"),
         )
 
     def _build_bottom_panel(self, parent: ttk.Frame) -> None:
@@ -241,37 +354,40 @@ class App:
         bottom_container.pack(fill="x")
 
         # Diagnostica connessione
-        diag_frame = ttk.LabelFrame(bottom_container, text="Diagnostica Connessione", padding=8)
-        diag_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
+        self._diag_frame = ttk.LabelFrame(bottom_container, text=self._t("diagnostics_frame"), padding=8)
+        self._diag_frame.pack(side="left", fill="both", expand=True, padx=(0, 5))
 
-        grid = ttk.Frame(diag_frame)
+        grid = ttk.Frame(self._diag_frame)
         grid.pack(fill="x")
 
+        # Salvo le label per poterle aggiornare quando cambia la lingua
+        self._diag_labels_text = []
         diag_labels = [
-            ("Controller:", "_lbl_controller", "Nessun controller"),
-            ("Connessione:", "_lbl_connection", "-"),
-            ("Polling rate:", "_lbl_polling", "- Hz"),
-            ("Latenza:", "_lbl_latency", "- ms"),
-            ("Jitter:", "_lbl_jitter", "- ms"),
-            ("Qualita:", "_lbl_quality", "-"),
+            ("controller", "_lbl_controller", self._t("no_controller")),
+            ("connection", "_lbl_connection", "-"),
+            ("polling_rate", "_lbl_polling", "- Hz"),
+            ("latency", "_lbl_latency", "- ms"),
+            ("jitter", "_lbl_jitter", "- ms"),
+            ("quality", "_lbl_quality", "-"),
         ]
 
-        for i, (text, attr, default) in enumerate(diag_labels):
+        for i, (key, attr, default) in enumerate(diag_labels):
             col = (i % 3) * 2
             row = i // 3
-            ttk.Label(grid, text=text, style="Status.TLabel").grid(
-                row=row, column=col, sticky="w", padx=(0, 5), pady=2
-            )
+            lbl_text = ttk.Label(grid, text=self._t(key), style="Status.TLabel")
+            lbl_text.grid(row=row, column=col, sticky="w", padx=(0, 5), pady=2)
+            self._diag_labels_text.append((lbl_text, key))
+
             lbl = ttk.Label(grid, text=default, style="Status.TLabel")
             lbl.grid(row=row, column=col + 1, sticky="w", padx=(0, 20), pady=2)
             setattr(self, attr, lbl)
 
         # Log ultime pressioni
-        log_frame = ttk.LabelFrame(bottom_container, text="Ultime pressioni", padding=8)
-        log_frame.pack(side="right", fill="both", padx=(5, 0))
+        self._log_frame = ttk.LabelFrame(bottom_container, text=self._t("log_frame"), padding=8)
+        self._log_frame.pack(side="right", fill="both", padx=(5, 0))
 
         self._log_text = tk.Text(
-            log_frame, width=30, height=4, font=("Consolas", 9),
+            self._log_frame, width=30, height=4, font=("Consolas", 9),
             bg=self._colors["sfondo"], fg=self._colors["testo"],
             insertbackground=self._colors["testo"], state="disabled",
             wrap="none"
@@ -295,17 +411,16 @@ class App:
         self.monitor.set_threshold(self._var_threshold.get())
 
         selected = self._combo_button.get()
-        if selected == "Tutti":
+        # Gestisce sia "Tutti" che "All" (traduzione)
+        if selected in ["Tutti", "All"]:
             self.monitor.set_monitored_button(None)
         else:
             self.monitor.set_monitored_button(selected)
 
         if not self.monitor.start():
             messagebox.showwarning(
-                "Controller non trovato",
-                "Nessun controller rilevato.\n\n"
-                "Verifica che il controller sia collegato e riconosciuto da Windows.\n"
-                "Se usi DS4Windows, assicurati che l'emulazione Xbox sia attiva."
+                self._t("controller_not_found"),
+                self._t("controller_not_found_msg")
             )
             return
 
@@ -349,7 +464,7 @@ class App:
         latency = self.monitor.get_latency_stats()
 
         if stats.total_presses == 0:
-            messagebox.showinfo("Nessun dato", "La sessione non contiene pressioni da salvare.")
+            messagebox.showinfo(self._t("no_data"), self._t("no_data_to_save"))
             return
 
         avg_duration = self.monitor.get_avg_duration()
@@ -372,23 +487,23 @@ class App:
         )
 
         if success:
-            messagebox.showinfo("Salvato", "Sessione salvata correttamente.")
+            messagebox.showinfo(self._t("saved"), self._t("session_saved"))
             self._btn_save.config(state="disabled")
         else:
-            messagebox.showerror("Errore", "Errore durante il salvataggio.")
+            messagebox.showerror(self._t("error"), self._t("save_error"))
 
     def _on_show_history(self) -> None:
         """Mostra i grafici storici in finestre separate."""
         sessions = self.data_manager.load_sessions()
         if not sessions:
             messagebox.showinfo(
-                "Nessun dato",
-                "Non ci sono sessioni salvate per questo profilo."
+                self._t("no_data"),
+                self._t("no_history")
             )
             return
 
         hist_window = tk.Toplevel(self.root)
-        hist_window.title("Grafici Storici - Durata Pressioni")
+        hist_window.title(self._t("history_window_title"))
         hist_window.configure(bg=self._colors["sfondo"])
         hist_window.geometry("850x700")
 
@@ -401,7 +516,7 @@ class App:
         fig_progress = self.history_viz.plot_progress(sessions)
         if fig_progress:
             tab1 = ttk.Frame(notebook)
-            notebook.add(tab1, text="Progressi")
+            notebook.add(tab1, text=self._t("tab_progress"))
             canvas1 = FigureCanvasTkAgg(fig_progress, master=tab1)
             canvas1.get_tk_widget().pack(fill="both", expand=True)
             canvas1.draw()
@@ -410,7 +525,7 @@ class App:
         fig_dist = self.history_viz.plot_distribution(sessions)
         if fig_dist:
             tab2 = ttk.Frame(notebook)
-            notebook.add(tab2, text="Distribuzione")
+            notebook.add(tab2, text=self._t("tab_distribution"))
             canvas2 = FigureCanvasTkAgg(fig_dist, master=tab2)
             canvas2.get_tk_widget().pack(fill="both", expand=True)
             canvas2.draw()
@@ -419,7 +534,7 @@ class App:
         fig_diag = self.history_viz.plot_diagnostics(sessions)
         if fig_diag:
             tab3 = ttk.Frame(notebook)
-            notebook.add(tab3, text="Diagnostica")
+            notebook.add(tab3, text=self._t("tab_diagnostics"))
             canvas3 = FigureCanvasTkAgg(fig_diag, master=tab3)
             canvas3.get_tk_widget().pack(fill="both", expand=True)
             canvas3.draw()
@@ -432,14 +547,14 @@ class App:
             )
             if fig_detail:
                 tab4 = ttk.Frame(notebook)
-                notebook.add(tab4, text="Dettaglio durate")
+                notebook.add(tab4, text=self._t("tab_detail"))
                 canvas4 = FigureCanvasTkAgg(fig_detail, master=tab4)
                 canvas4.get_tk_widget().pack(fill="both", expand=True)
                 canvas4.draw()
 
         # Tab Report
         tab_report = ttk.Frame(notebook, padding=15)
-        notebook.add(tab_report, text="Report")
+        notebook.add(tab_report, text=self._t("tab_report"))
         self._build_report_tab(tab_report, sessions)
 
     def _build_report_tab(self, parent: ttk.Frame, sessions: list[dict]) -> None:
@@ -461,35 +576,35 @@ class App:
         jit = report.get("jitter", {})
 
         lines = [
-            f"Sessioni totali: {report.get('sessioni_totali', 0)}",
+            self._t("report_total_sessions", count=report.get('sessioni_totali', 0)),
             "",
-            "--- Durata Pressioni ---",
-            f"  Best minimo:    {dur.get('best_min_ms', 0)} ms",
-            f"  Media sessioni: {dur.get('media_avg_ms', 0)} ms",
-            f"  Trend:          {dur.get('trend', '-')}",
+            self._t("report_press_duration"),
+            self._t("report_best_min", value=dur.get('best_min_ms', 0)),
+            self._t("report_avg_sessions", value=dur.get('media_avg_ms', 0)),
+            self._t("report_trend", value=dur.get('trend', '-')),
             "",
-            "--- Analisi Statistica ---",
-            f"  Mediana:        {press_analysis.get('mediana_ms', 0)} ms",
-            f"  Percentile 10:  {press_analysis.get('percentile_10', 0)} ms",
-            f"  Percentile 90:  {press_analysis.get('percentile_90', 0)} ms",
-            f"  Deviazione std: {press_analysis.get('std_dev_ms', 0)} ms",
+            self._t("report_statistical"),
+            self._t("report_median", value=press_analysis.get('mediana_ms', 0)),
+            self._t("report_percentile_10", value=press_analysis.get('percentile_10', 0)),
+            self._t("report_percentile_90", value=press_analysis.get('percentile_90', 0)),
+            self._t("report_std_dev", value=press_analysis.get('std_dev_ms', 0)),
             "",
-            "--- Latenza Controller ---",
-            f"  Media:    {lat.get('media_ms', 0)} ms",
-            f"  Migliore: {lat.get('migliore_ms', 0)} ms",
+            self._t("report_latency"),
+            self._t("report_avg", value=lat.get('media_ms', 0)),
+            self._t("report_best", value=lat.get('migliore_ms', 0)),
             "",
-            "--- Jitter ---",
-            f"  Medio: {jit.get('medio_ms', 0)} ms",
+            self._t("report_jitter"),
+            self._t("report_avg_jitter", value=jit.get('medio_ms', 0)),
             "",
-            "--- Confronto Connessione ---",
+            self._t("report_connection"),
         ]
 
         for conn_type in ["USB", "Bluetooth"]:
             data = conn_report.get(conn_type, {})
             lines.append(f"  {conn_type}:")
-            lines.append(f"    Sessioni:         {data.get('sessioni', 0)}")
-            lines.append(f"    Latenza media:    {data.get('latenza_media_ms', 0)} ms")
-            lines.append(f"    Best min press:   {data.get('best_min_press_ms', 0)} ms")
+            lines.append(self._t("report_conn_sessions", value=data.get('sessioni', 0)))
+            lines.append(self._t("report_conn_latency", value=data.get('latenza_media_ms', 0)))
+            lines.append(self._t("report_conn_best", value=data.get('best_min_press_ms', 0)))
 
         text.insert("1.0", "\n".join(lines))
         text.config(state="disabled")
@@ -499,15 +614,15 @@ class App:
         path = filedialog.asksaveasfilename(
             defaultextension=".csv",
             filetypes=[("CSV files", "*.csv")],
-            title="Esporta dati"
+            title=self._t("export_title")
         )
         if not path:
             return
 
         if self.data_manager.export_all_data(path):
-            messagebox.showinfo("Export", f"Dati esportati in:\n{path}")
+            messagebox.showinfo(self._t("export_data"), self._t("export_success", path=path))
         else:
-            messagebox.showerror("Errore", "Nessun dato da esportare o errore di scrittura.")
+            messagebox.showerror(self._t("error"), self._t("export_error"))
 
     def _on_profile_change(self, _event=None) -> None:
         name = self._combo_profile.get()
@@ -516,13 +631,13 @@ class App:
     def _on_new_profile(self) -> None:
         """Crea un nuovo profilo utente."""
         dialog = tk.Toplevel(self.root)
-        dialog.title("Nuovo profilo")
+        dialog.title(self._t("new_profile"))
         dialog.geometry("300x120")
         dialog.configure(bg=self._colors["sfondo"])
         dialog.transient(self.root)
         dialog.grab_set()
 
-        ttk.Label(dialog, text="Nome profilo:").pack(pady=(15, 5))
+        ttk.Label(dialog, text=self._t("profile_name")).pack(pady=(15, 5))
         entry = ttk.Entry(dialog, width=25)
         entry.pack(pady=5)
         entry.focus()
@@ -535,10 +650,10 @@ class App:
                     self._combo_profile.set(name)
                     self.data_manager.select_profile(name)
                 else:
-                    messagebox.showwarning("Errore", f"Profilo '{name}' esiste gia.")
+                    messagebox.showwarning(self._t("error"), self._t("profile_exists", name=name))
             dialog.destroy()
 
-        ttk.Button(dialog, text="Crea", command=create).pack(pady=10)
+        ttk.Button(dialog, text=self._t("create"), command=create).pack(pady=10)
         entry.bind("<Return>", lambda _: create())
 
     def _on_threshold_change(self) -> None:
@@ -552,7 +667,8 @@ class App:
 
     def _on_button_change(self, _event=None) -> None:
         selected = self._combo_button.get()
-        if selected == "Tutti":
+        # Gestisce sia "Tutti" che "All" (traduzione)
+        if selected in ["Tutti", "All"]:
             self.monitor.set_monitored_button(None)
         else:
             self.monitor.set_monitored_button(selected)

@@ -1,4 +1,5 @@
 {
+    "lingua": "en",
     "soglia_durata_ms_default": 50.0,
     "intervallo_aggiornamento_ms": 50,
     "percorso_dati": "data",

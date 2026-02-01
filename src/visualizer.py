@@ -29,6 +29,9 @@ class RealtimeChart:
         max_bars: int = 40,
         threshold_ms: float = 50.0,
         colors: Optional[dict] = None,
+        threshold_label: str = "Threshold:",
+        x_axis_label: str = "Press #",
+        y_axis_label: str = "Duration (ms)",
     ):
         """Inizializza il grafico real-time.
 
@@ -37,9 +40,15 @@ class RealtimeChart:
             max_bars: numero massimo di barre visibili
             threshold_ms: soglia da visualizzare come linea orizzontale
             colors: dict con colori personalizzati
+            threshold_label: label tradotta per la soglia
+            x_axis_label: label tradotta per l'asse X
+            y_axis_label: label tradotta per l'asse Y
         """
         self.max_bars = max_bars
         self.threshold_ms = threshold_ms
+        self.threshold_label = threshold_label
+        self.x_axis_label = x_axis_label
+        self.y_axis_label = y_axis_label
 
         colors = colors or {}
         self._color_threshold = colors.get("grafico_soglia", "#e67e22")
@@ -60,7 +69,7 @@ class RealtimeChart:
         self._threshold_line = self._ax.axhline(
             y=self.threshold_ms, color=self._color_threshold,
             linestyle="--", linewidth=1.5, alpha=0.9,
-            label=f"Soglia: {self.threshold_ms:.0f} ms"
+            label=f"{self.threshold_label} {self.threshold_ms:.0f} ms"
         )
         self._ax.legend(loc="upper right", fontsize=8,
                         facecolor=self._color_bg, edgecolor=self._color_text,
@@ -75,8 +84,8 @@ class RealtimeChart:
     def _setup_axes(self) -> None:
         """Configura stile degli assi."""
         self._ax.set_facecolor(self._color_bg)
-        self._ax.set_xlabel("Pressione #", color=self._color_text, fontsize=9)
-        self._ax.set_ylabel("Durata (ms)", color=self._color_text, fontsize=9)
+        self._ax.set_xlabel(self.x_axis_label, color=self._color_text, fontsize=9)
+        self._ax.set_ylabel(self.y_axis_label, color=self._color_text, fontsize=9)
         self._ax.tick_params(colors=self._color_text, labelsize=8)
         for spine in self._ax.spines.values():
             spine.set_color(self._color_text)
@@ -91,7 +100,7 @@ class RealtimeChart:
         self._threshold_line = self._ax.axhline(
             y=self.threshold_ms, color=self._color_threshold,
             linestyle="--", linewidth=1.5, alpha=0.9,
-            label=f"Soglia: {self.threshold_ms:.0f} ms"
+            label=f"{self.threshold_label} {self.threshold_ms:.0f} ms"
         )
         self._ax.legend(loc="upper right", fontsize=8,
                         facecolor=self._color_bg, edgecolor=self._color_text,
@@ -138,7 +147,7 @@ class RealtimeChart:
         self._ax.axhline(
             y=self.threshold_ms, color=self._color_threshold,
             linestyle="--", linewidth=1.5, alpha=0.9,
-            label=f"Soglia: {self.threshold_ms:.0f} ms"
+            label=f"{self.threshold_label} {self.threshold_ms:.0f} ms"
         )
 
         # Etichette durata sulle barre (solo se poche)
@@ -169,6 +178,26 @@ class RealtimeChart:
     def set_threshold(self, value_ms: float) -> None:
         """Aggiorna la soglia visualizzata."""
         self.threshold_ms = value_ms
+        self._redraw()
+
+    def set_threshold_label(self, threshold_label: str) -> None:
+        """Aggiorna la label della soglia (per cambio lingua).
+
+        Args:
+            threshold_label: nuova label tradotta
+        """
+        self.threshold_label = threshold_label
+        self._redraw()
+
+    def set_axis_labels(self, x_axis_label: str, y_axis_label: str) -> None:
+        """Aggiorna le label degli assi (per cambio lingua).
+
+        Args:
+            x_axis_label: nuova label tradotta per asse X
+            y_axis_label: nuova label tradotta per asse Y
+        """
+        self.x_axis_label = x_axis_label
+        self.y_axis_label = y_axis_label
         self._redraw()
 
     def get_figure(self) -> Figure:
