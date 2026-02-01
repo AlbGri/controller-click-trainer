@@ -29,6 +29,7 @@ a = Analysis(
         'src.data_manager',
         'src.diagnostics',
         'src.visualizer',
+        'src.translations',
     ],
     hookspath=[],
     hooksconfig={},
