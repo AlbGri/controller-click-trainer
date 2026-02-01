@@ -42,7 +42,7 @@ In molti giochi competitivi, la durata della pressione di un tasto influenza dir
 
 Il file `config\settings.json` accanto all'exe puo' essere modificato per personalizzare colori e soglie.
 
-#### ⚠️ Windows SmartScreen Warning
+#### Windows SmartScreen Warning
 
 Al primo avvio, Windows Defender SmartScreen potrebbe mostrare un avviso "App non riconosciuta" o "Windows ha protetto il PC".
 
@@ -58,10 +58,10 @@ Al primo avvio, Windows Defender SmartScreen potrebbe mostrare un avviso "App no
 - Windows blocca per precauzione tutti gli exe non firmati scaricati da Internet
 
 **E' sicuro?**
-- ✅ Codice completamente open source e ispezionabile
-- ✅ Nessuna connessione Internet durante l'uso
-- ✅ Nessun dato inviato a server esterni
-- ✅ Puoi compilare l'exe tu stesso dal sorgente (vedi [docs/github_workflow.md](docs/github_workflow.md))
+- Codice completamente open source e ispezionabile
+- Nessuna connessione Internet durante l'uso
+- Nessun dato inviato a server esterni
+- Puoi compilare l'exe tu stesso dal sorgente (vedi [docs/github_workflow.md](docs/github_workflow.md))
 
 ### Opzione 2: Esecuzione da Sorgente (per sviluppatori)
 
