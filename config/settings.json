@@ -1,0 +1,28 @@
+{
+    "soglia_durata_ms_default": 50.0,
+    "intervallo_aggiornamento_ms": 50,
+    "percorso_dati": "data",
+    "profilo_default": "default",
+    "controller_mappings": {
+        "BTN_SOUTH": "A",
+        "BTN_EAST": "B",
+        "BTN_WEST": "X",
+        "BTN_NORTH": "Y",
+        "BTN_TL": "LB",
+        "BTN_TR": "RB",
+        "BTN_THUMBL": "LS",
+        "BTN_THUMBR": "RS",
+        "BTN_START": "Start",
+        "BTN_SELECT": "Back",
+        "ABS_HAT0X": "D-Pad X",
+        "ABS_HAT0Y": "D-Pad Y"
+    },
+    "colori": {
+        "sopra_soglia": "#2ecc71",
+        "sotto_soglia": "#e74c3c",
+        "sfondo": "#2c3e50",
+        "testo": "#ecf0f1",
+        "grafico_linea": "#3498db",
+        "grafico_soglia": "#e67e22"
+    }
+}
