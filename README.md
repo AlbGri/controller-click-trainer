@@ -5,7 +5,7 @@ Misura in millisecondi quanto tempo un tasto resta premuto, fornisce feedback vi
 
 ## A cosa serve
 
-In giochi come Rocket League, la durata della pressione di un tasto influenza direttamente il gameplay: tenere premuto il salto piu' a lungo significa saltare piu' in alto. Questo tool ti aiuta a:
+In molti giochi competitivi, la durata della pressione di un tasto influenza direttamente il gameplay (es. azioni piu' o meno potenti in base al tempo di pressione). Questo tool ti aiuta a:
 
 - **Misurare** la durata esatta di ogni singola pressione in ms
 - **Allenare** i tap rapidi: l'obiettivo e' stare **sotto** una soglia target
@@ -27,32 +27,46 @@ In giochi come Rocket League, la durata della pressione di un tasto influenza di
 ## Requisiti Sistema
 
 - Windows 10/11
-- Python 3.8+ (consigliato 3.12 via Miniconda)
 - Controller Xbox o compatibile (anche DS4Windows con emulazione Xbox)
 
 ## Installazione
 
-### 1. Clona il repository
+### Opzione 1: Download Exe Standalone (consigliato per utenti finali)
+
+**Nessuna installazione Python richiesta!**
+
+1. Vai alla pagina [Releases](https://github.com/AlbGri/controller-click-trainer/releases)
+2. Scarica l'ultima versione: `ControllerClickTrainer-vX.X.X-windows.zip`
+3. Estrai il file ZIP in una cartella
+4. Esegui `ControllerClickTrainer.exe`
+
+Il file `config\settings.json` accanto all'exe puo' essere modificato per personalizzare colori e soglie.
+
+### Opzione 2: Esecuzione da Sorgente (per sviluppatori)
+
+**Requisiti**: Python 3.8+ (consigliato 3.12 via Miniconda)
+
+#### 1. Clona il repository
 
 ```bash
-git clone https://github.com/tuo-username/controller-click-trainer.git
+git clone https://github.com/AlbGri/controller-click-trainer.git
 cd controller-click-trainer
 ```
 
-### 2. Crea environment conda (consigliato)
+#### 2. Crea environment conda
 
 ```bash
 conda create -n click-trainer python=3.12 -y
 conda activate click-trainer
 ```
 
-### 3. Installa dipendenze
+#### 3. Installa dipendenze
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Avvia
+#### 4. Avvia
 
 ```bash
 python src/main.py
@@ -74,7 +88,7 @@ python src/main.py
 ```
 controller-click-trainer/
 ├── src/
-│   ├── main.py               # Entry point
+│   ├── main.py               # Entry point (supporta exe PyInstaller)
 │   ├── controller_monitor.py  # Rilevamento controller, traccia press/release
 │   ├── data_manager.py        # Gestione dati, profili, CSV
 │   ├── diagnostics.py         # Diagnostica: polling rate, latenza, jitter
@@ -84,7 +98,9 @@ controller-click-trainer/
 │   └── settings.json          # Configurazione applicazione
 ├── data/                      # Sessioni salvate (CSV)
 ├── docs/
-│   └── usage_guide.md         # Guida uso dettagliata
+│   ├── usage_guide.md         # Guida uso dettagliata
+│   └── github_workflow.md     # Guida pubblicazione GitHub + build exe
+├── ControllerClickTrainer.spec  # Config PyInstaller per build exe
 ├── requirements.txt
 ├── .gitignore
 └── LICENSE
@@ -113,6 +129,20 @@ controller-click-trainer/
 | numpy | Calcoli numerici |
 | inputs | Lettura input controller (press/release) |
 | tkinter | Interfaccia grafica (incluso in Python) |
+
+## Build Exe (per sviluppatori)
+
+Per creare l'exe standalone:
+
+```bash
+conda activate click-trainer
+pip install pyinstaller
+pyinstaller ControllerClickTrainer.spec --noconfirm
+```
+
+L'exe sara' in `dist\ControllerClickTrainer\ControllerClickTrainer.exe`.
+
+Per istruzioni dettagliate su build, release GitHub e workflow completo, vedi [docs/github_workflow.md](docs/github_workflow.md).
 
 ## Licenza
 

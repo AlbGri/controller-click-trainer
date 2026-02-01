@@ -30,8 +30,14 @@ desktop.ini
 data/*.csv
 data/profiles.json
 
+# Release files (usati solo per GitHub releases)
+*.zip
+
 # Conda
 .conda/
 
 # Claude
 .claude/
+
+# AI prompts (solo locale, non pubblico)
+PROMPT.md
