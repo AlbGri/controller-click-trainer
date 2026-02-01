@@ -42,6 +42,27 @@ In molti giochi competitivi, la durata della pressione di un tasto influenza dir
 
 Il file `config\settings.json` accanto all'exe puo' essere modificato per personalizzare colori e soglie.
 
+#### ⚠️ Windows SmartScreen Warning
+
+Al primo avvio, Windows Defender SmartScreen potrebbe mostrare un avviso "App non riconosciuta" o "Windows ha protetto il PC".
+
+**Questo e' normale per applicazioni open source non firmate digitalmente.**
+
+**Come procedere**:
+1. Clicca su **"Ulteriori informazioni"** (o "More info")
+2. Clicca su **"Esegui comunque"** (o "Run anyway")
+3. L'applicazione si avviera' normalmente
+
+**Perche' succede?**
+- L'exe non ha una firma digitale (i certificati costano $200-400/anno)
+- Windows blocca per precauzione tutti gli exe non firmati scaricati da Internet
+
+**E' sicuro?**
+- ✅ Codice completamente open source e ispezionabile
+- ✅ Nessuna connessione Internet durante l'uso
+- ✅ Nessun dato inviato a server esterni
+- ✅ Puoi compilare l'exe tu stesso dal sorgente (vedi [docs/github_workflow.md](docs/github_workflow.md))
+
 ### Opzione 2: Esecuzione da Sorgente (per sviluppatori)
 
 **Requisiti**: Python 3.8+ (consigliato 3.12 via Miniconda)
