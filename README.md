@@ -9,6 +9,8 @@
 Desktop application to monitor and train **press duration** on gaming controllers (Xbox, DS4Windows).
 Measures in milliseconds how long a button stays pressed, provides visual feedback against a configurable threshold and saves statistics to track progress.
 
+![Settings](docs/screenshot.png)
+
 ### What it's for
 
 In many competitive games, the duration of a button press directly influences gameplay (e.g., more or less powerful actions based on press time). This tool helps you:
@@ -183,6 +185,8 @@ MIT License - see [LICENSE](LICENSE)
 
 Applicazione desktop per monitorare e allenare la **durata delle pressioni** sui controller gaming (Xbox, DS4Windows).
 Misura in millisecondi quanto tempo un tasto resta premuto, fornisce feedback visivo rispetto a una soglia configurabile e salva le statistiche per tracciare i progressi.
+
+![Impostazioni](docs/screenshot.png)
 
 ### A cosa serve
 
