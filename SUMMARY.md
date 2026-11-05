@@ -250,7 +250,7 @@ Update `get_flag_emoji()` and `get_next_language()` accordingly.
 
 ### License and Contributions
 
-- **License**: MIT
+- **License**: AGPL-3.0
 - **Contributions**: Welcome via pull requests
 - **Issues**: Report bugs or feature requests on GitHub Issues
 
@@ -512,7 +512,7 @@ Aggiorna `get_flag_emoji()` e `get_next_language()` di conseguenza.
 
 ### Licenza e Contributi
 
-- **Licenza**: MIT
+- **Licenza**: AGPL-3.0
 - **Contributi**: Benvenuti via pull request
 - **Issues**: Segnalare bug o feature request su GitHub Issues
 

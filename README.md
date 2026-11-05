@@ -180,7 +180,7 @@ Copy-Item -Path "dist\ControllerClickTrainer\_internal\config" -Destination "dis
 
 ### License
 
-MIT License - see [LICENSE](LICENSE)
+AGPL-3.0 - see [LICENSE](LICENSE)
 
 ---
 
@@ -360,4 +360,4 @@ Copy-Item -Path "dist\ControllerClickTrainer\_internal\config" -Destination "dis
 
 ### Licenza
 
-MIT License - vedi [LICENSE](LICENSE)
+AGPL-3.0 - vedi [LICENSE](LICENSE)
