@@ -10,7 +10,7 @@ Ogni pressione viene registrata quando **rilasci** il tasto: il tool misura il t
 
 ```
 conda activate click-trainer
-cd c:\Alberto\Coding\controller-click-trainer
+cd controller-click-trainer
 python src/main.py
 ```
 

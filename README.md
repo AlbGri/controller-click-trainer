@@ -70,7 +70,7 @@ On first launch, Windows Defender SmartScreen may show a warning "Unrecognized a
 - Completely open source and inspectable code
 - No Internet connection during use
 - No data sent to external servers
-- You can compile the exe yourself from source (see [docs/github_workflow.md](docs/github_workflow.md))
+- You can compile the exe yourself from source (see Build Exe below)
 
 #### Option 2: Run from Source (for developers)
 
@@ -129,8 +129,7 @@ controller-click-trainer/
 │   └── settings.json          # Application configuration
 ├── data/                      # Saved sessions (CSV)
 ├── docs/
-│   ├── usage_guide.md         # Detailed usage guide
-│   └── github_workflow.md     # GitHub publishing guide + exe build
+│   └── usage_guide.md         # Detailed usage guide
 ├── ControllerClickTrainer.spec  # PyInstaller config for exe build
 ├── requirements.txt
 ├── .gitignore
@@ -173,7 +172,11 @@ pyinstaller ControllerClickTrainer.spec --noconfirm
 
 The exe will be in `dist\ControllerClickTrainer\ControllerClickTrainer.exe`.
 
-For detailed instructions on build, GitHub release and complete workflow, see [docs/github_workflow.md](docs/github_workflow.md).
+Then copy the configuration next to the exe, where the app reads it:
+
+```powershell
+Copy-Item -Path "dist\ControllerClickTrainer\_internal\config" -Destination "dist\ControllerClickTrainer\config" -Recurse -Force
+```
 
 ### License
 
@@ -247,7 +250,7 @@ Al primo avvio, Windows Defender SmartScreen potrebbe mostrare un avviso "App no
 - Codice completamente open source e ispezionabile
 - Nessuna connessione Internet durante l'uso
 - Nessun dato inviato a server esterni
-- Puoi compilare l'exe tu stesso dal sorgente (vedi [docs/github_workflow.md](docs/github_workflow.md))
+- Puoi compilare l'exe tu stesso dal sorgente (vedi Build Exe più sotto)
 
 #### Opzione 2: Esecuzione da Sorgente (per sviluppatori)
 
@@ -306,8 +309,7 @@ controller-click-trainer/
 │   └── settings.json          # Configurazione applicazione
 ├── data/                      # Sessioni salvate (CSV)
 ├── docs/
-│   ├── usage_guide.md         # Guida uso dettagliata
-│   └── github_workflow.md     # Guida pubblicazione GitHub + build exe
+│   └── usage_guide.md         # Guida uso dettagliata
 ├── ControllerClickTrainer.spec  # Config PyInstaller per build exe
 ├── requirements.txt
 ├── .gitignore
@@ -350,7 +352,11 @@ pyinstaller ControllerClickTrainer.spec --noconfirm
 
 L'exe sarà in `dist\ControllerClickTrainer\ControllerClickTrainer.exe`.
 
-Per istruzioni dettagliate su build, release GitHub e workflow completo, vedi [docs/github_workflow.md](docs/github_workflow.md).
+Poi copia la configurazione accanto all'exe, dove l'app la legge:
+
+```powershell
+Copy-Item -Path "dist\ControllerClickTrainer\_internal\config" -Destination "dist\ControllerClickTrainer\config" -Recurse -Force
+```
 
 ### Licenza
 

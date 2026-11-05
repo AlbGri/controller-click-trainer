@@ -260,7 +260,6 @@ For significant changes, please open an issue first for discussion.
 
 - [README.md](README.md) - Installation and usage
 - [docs/usage_guide.md](docs/usage_guide.md) - Detailed user guide
-- [docs/github_workflow.md](docs/github_workflow.md) - Development and release workflow
 - [ControllerClickTrainer.spec](ControllerClickTrainer.spec) - PyInstaller config
 
 **Repository**: https://github.com/AlbGri/controller-click-trainer
@@ -523,7 +522,6 @@ Per modifiche significative, aprire prima un issue per discussione.
 
 - [README.md](README.md) - Installazione e uso
 - [docs/usage_guide.md](docs/usage_guide.md) - Guida dettagliata utente
-- [docs/github_workflow.md](docs/github_workflow.md) - Workflow sviluppo e release
 - [ControllerClickTrainer.spec](ControllerClickTrainer.spec) - Config PyInstaller
 
 **Repository**: https://github.com/AlbGri/controller-click-trainer

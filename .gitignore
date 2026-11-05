@@ -36,8 +36,11 @@ data/profiles.json
 # Conda
 .conda/
 
-# Claude
+# File privati: lista bianca dei .md pubblici nella radice
+/*.md
+!/README.md
+!/CHANGELOG.md
+!/SUMMARY.md
+CLAUDE.md
+_local/
 .claude/
-
-# AI prompts (solo locale, non pubblico)
-PROMPT.md
